@@ -2,22 +2,25 @@
 
 # save this as app.py
 import os
-from twilio.rest import Client
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from flask import Flask, request
+from twilio.rest import Client
 
 app = Flask(__name__)
 
 
 @app.route("/")
 def hello():
-    return "Adventure Park!"
+    return "Hello"
 
 
 @app.route("/email", methods=['POST'])
 def email():
     hash = request.form['hash_validator']
+    print("estoy aqui")
+    print(request.form['hash_validator'])
+    print(os.environ.get('HASH_VALIDATOR'))
     if (hash == os.environ.get('HASH_VALIDATOR')):
         try:
             email_sender = os.environ.get("EMAIL_SENDER")
@@ -48,25 +51,23 @@ def email():
 @app.route("/sms", methods=['POST'])
 def sms():
     hash = request.form['hash_validator']
-    print(os.environ.get('HASH_VALIDATOR'))
     if (hash == os.environ.get('HASH_VALIDATOR')):
         try:
             account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
             auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
-            print("esta es la variable de entorno", account_sid)
             client = Client(account_sid, auth_token)
             message = client.messages.create(
                 messaging_service_sid=os.environ.get(
                     'TWILIO_MESSAGING_SERVICE_SID'),
-                body=request.form['Primer mensaje de texto'],
-                to=request.form['+573104572663']
+                body=request.form['message'],
+                to=request.form['destination']
             )
             print(message.sid)
-            return "enviado"
+            return "Enviado"
         except:
-            return "error no enviado"
+            return "Error: SMS no enviado."
     else:
-        return "error de hash"
+        return "Error de Hash"
 
 
 if __name__ == '__main__':
