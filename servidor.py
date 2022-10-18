@@ -41,7 +41,7 @@ def email():
                 return "OK"
             except Exception as e:
                 print(e)
-                return "KO"
+                return "KO" #OK
         except:
             return "Faltan datos para el mensaje"
     else:
