@@ -14,9 +14,8 @@ app = Flask(__name__)
 def hello():
     return "Hello"
 
-
-@app.route("/email", methods=['POST'])
-def email():
+@app.route("/email-code", methods=['POST'])
+def emailCodigo():
     hash = request.form['hash_validator']
     print("estoy aqui")
     print(request.form['hash_validator'])
@@ -41,10 +40,49 @@ def email():
                 return "OK"
             except Exception as e:
                 print(e)
-                return "KO" #OK
+                return "KO"
         except:
             return "Faltan datos para el mensaje"
     else:
+        return "Hash Error"
+
+@app.route("/email", methods = ['POST'])
+def email():
+    hash = request.form['hash_validator']
+    print("estoy aqui")
+    print(request.form['hash_validator'])
+    print(os.environ.get('HASH_VALIDATOR'))
+    if(hash == os.environ.get('HASH_VALIDATOR')):
+        try:
+            email_sender = os.environ.get("EMAIL_SENDER")
+            ##to = request.form['destination']
+            nombre = request.form['nombre']
+            correo = request.form['correo']
+            clave = request.form['clave']
+            texto = request.form['texto']
+            message = Mail(
+            from_email = email_sender,
+            to_emails = correo)
+            message.dynamic_template_data = {
+                'nombre': nombre,
+                'correo': correo,
+                'clave': clave,
+                'texto': texto
+            }
+            message.template_id = os.environ.get('TEMPLATE_ID_REGISTRO')           
+            try:
+                sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+                response = sg.send(message)
+                print(response.status_code)
+                print(response.body)
+                print(response.headers)
+                return "OK"
+            except Exception as e:
+                print(e)
+                return "KO"
+        except:
+            return "Faltan datos para el mensaje"
+    else: 
         return "Hash Error"
 
 
